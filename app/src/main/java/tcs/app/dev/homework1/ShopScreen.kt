@@ -1,14 +1,30 @@
 package tcs.app.dev.homework1
 
+import tcs.app.dev.R
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.PriceCheck
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import tcs.app.dev.homework1.data.Cart
-import tcs.app.dev.homework1.data.Discount
-import tcs.app.dev.homework1.data.Shop
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import tcs.app.dev.homework1.data.*
+import tcs.app.dev.homework1.ui.*
 
 /**
  * # Homework 3 — Shop App
@@ -68,9 +84,9 @@ import tcs.app.dev.homework1.data.Shop
  *        button to return to the shop.
  *
  * - **Bottom bar**:
-*       - In Shop/Discounts, show a 2-tab bottom bar to switch between **Shop** and **Discounts**.
-*       - In Cart, hide the tab bar and instead show the cart bottom bar with the total and **Pay**
-*         action as described above.
+ *       - In Shop/Discounts, show a 2-tab bottom bar to switch between **Shop** and **Discounts**.
+ *       - In Cart, hide the tab bar and instead show the cart bottom bar with the total and **Pay**
+ *         action as described above.
  *
  * ## Hints
  * - Keep your cart as a single source of truth and derive counts/price from it.
@@ -92,6 +108,13 @@ import tcs.app.dev.homework1.data.Shop
  * - [Pager](https://developer.android.com/develop/ui/compose/layouts/pager)
  *
  */
+
+private enum class ShopItemsTab {
+    Shop,
+    Discounts,
+    Cart
+}
+
 @Composable
 fun ShopScreen(
     shop: Shop,
@@ -99,5 +122,164 @@ fun ShopScreen(
     modifier: Modifier = Modifier
 ) {
     var cart by rememberSaveable { mutableStateOf(Cart(shop = shop)) }
+    var selectedTab by rememberSaveable { mutableStateOf(ShopItemsTab.Shop) }
 
+    val hasItemsInCart = cart.itemCount > 0u
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            ShopTopBar(
+                selectedTab = selectedTab,
+                hasItemsInCart = hasItemsInCart,
+                cartItemCount = cart.itemCount,
+                onBackFromCart = { selectedTab = ShopItemsTab.Shop },
+                onOpenCart = { if (hasItemsInCart) selectedTab = ShopItemsTab.Cart }
+            )
+        },
+        bottomBar = {
+            if (selectedTab != ShopItemsTab.Cart) {
+                ShopBottomBar(
+                    selectedTab = selectedTab,
+                    hasItemsInCart = hasItemsInCart,
+                    onTabSelected = { tab ->
+                        if (tab == ShopItemsTab.Cart && !hasItemsInCart) return@ShopBottomBar
+                        selectedTab = tab
+                    }
+                )
+            }
+        }
+    ) { innerPadding ->
+        when (selectedTab) {
+            ShopItemsTab.Shop -> ShopTab(
+                shop = shop,
+                cart = cart,
+                modifier = Modifier.padding(innerPadding),
+                onAddToCart = { item ->
+                    cart = cart + item
+                }
+            )
+
+            ShopItemsTab.Discounts -> DiscountTab(
+                discounts = availableDiscounts,
+                cart = cart,
+                modifier = Modifier.padding(innerPadding),
+                onAddDiscount = { discount ->
+                    if (discount !in cart.discounts) {
+                        cart = cart + discount
+                    }
+                }
+            )
+
+            ShopItemsTab.Cart -> CartTab(
+                cart = cart,
+                modifier = Modifier.padding(innerPadding),
+                onUpdateItemAmount = { item, newAmount ->
+                    cart = if (newAmount == 0u) {
+                        cart - item
+                    } else {
+                        cart.update(item to newAmount)
+                    }
+                },
+                onRemoveDiscount = { discount ->
+                    cart = cart - discount
+                },
+                onPay = {
+                    if (cart.itemCount > 0u) {
+                        cart = Cart(shop = shop)
+                        selectedTab = ShopItemsTab.Shop
+                    }
+                }
+            )
+        }
+
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ShopTopBar(
+    selectedTab: ShopItemsTab,
+    hasItemsInCart: Boolean,
+    cartItemCount: UInt,
+    onBackFromCart: () -> Unit,
+    onOpenCart: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text = when (selectedTab) {
+                    ShopItemsTab.Cart -> stringResource(R.string.label_cart)
+                    else -> stringResource(R.string.label_shop)
+                }
+            )
+        },
+        navigationIcon = {
+            if (selectedTab == ShopItemsTab.Cart) {
+                IconButton(onClick = onBackFromCart) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBackIosNew,
+                        contentDescription = stringResource(R.string.description_back_button)
+                    )
+                }
+            }
+        },
+        actions = {
+            if (selectedTab != ShopItemsTab.Cart) {
+                IconButton(
+                    enabled = hasItemsInCart,
+                    onClick = onOpenCart
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = stringResource(R.string.description_go_to_cart)
+                    )
+                    //TODO: Badge with cartItemCount
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun ShopBottomBar(
+    selectedTab: ShopItemsTab,
+    hasItemsInCart: Boolean,
+    onTabSelected: (ShopItemsTab) -> Unit
+) {
+    NavigationBar {
+        NavigationBarItem(
+            selected = selectedTab == ShopItemsTab.Shop,
+            onClick = { onTabSelected(ShopItemsTab.Shop) },
+            icon = {
+                Icon(
+                    Icons.Default.Storefront,
+                    contentDescription = stringResource(R.string.label_shop)
+                )
+            },
+            label = { Text(stringResource(R.string.label_shop)) }
+        )
+        NavigationBarItem(
+            selected = selectedTab == ShopItemsTab.Discounts,
+            onClick = { onTabSelected(ShopItemsTab.Discounts) },
+            icon = {
+                Icon(
+                    Icons.Default.PriceCheck,
+                    contentDescription = stringResource(R.string.label_discounts)
+                )
+            },
+            label = { Text(stringResource(R.string.label_discounts)) }
+        )
+        NavigationBarItem(
+            selected = selectedTab == ShopItemsTab.Cart,
+            onClick = { onTabSelected(ShopItemsTab.Cart) },
+            icon = {
+                Icon(
+                    Icons.Default.ShoppingCart,
+                    contentDescription = stringResource(R.string.label_cart)
+                )
+            },
+            label = { Text(stringResource(R.string.label_cart)) }
+        )
+    }
 }
