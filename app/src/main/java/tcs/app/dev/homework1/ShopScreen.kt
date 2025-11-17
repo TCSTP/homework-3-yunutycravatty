@@ -1,5 +1,6 @@
 package tcs.app.dev.homework1
 
+import tcs.app.dev.R
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import tcs.app.dev.homework1.data.*
 import tcs.app.dev.homework1.ui.*
@@ -207,8 +209,8 @@ private fun ShopTopBar(
         title = {
             Text(
                 text = when (selectedTab) {
-                    ShopItemsTab.Cart -> "Cart"              //TODO: stringResource(...)
-                    else -> "Shop"
+                    ShopItemsTab.Cart -> stringResource(R.string.label_cart)
+                    else -> stringResource(R.string.label_shop)
                 }
             )
         },
@@ -217,7 +219,7 @@ private fun ShopTopBar(
                 IconButton(onClick = onBackFromCart) {
                     Icon(
                         imageVector = Icons.Default.ArrowBackIosNew,
-                        contentDescription = "Back button"
+                        contentDescription = stringResource(R.string.description_back_button)
                     )
                 }
             }
@@ -230,7 +232,7 @@ private fun ShopTopBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = "Open cart"
+                        contentDescription = stringResource(R.string.description_go_to_cart)
                     )
                     //TODO: Badge with cartItemCount
                 }
@@ -252,10 +254,10 @@ private fun ShopBottomBar(
             icon = {
                 Icon(
                     Icons.Default.Storefront,
-                    contentDescription = "Shop"
+                    contentDescription = stringResource(R.string.label_shop)
                 )
             },
-            label = { Text("Shop") }
+            label = { Text(stringResource(R.string.label_shop)) }
         )
         NavigationBarItem(
             selected = selectedTab == ShopItemsTab.Discounts,
@@ -263,10 +265,10 @@ private fun ShopBottomBar(
             icon = {
                 Icon(
                     Icons.Default.PriceCheck,
-                    contentDescription = "Discounts"
+                    contentDescription = stringResource(R.string.label_discounts)
                 )
             },
-            label = { Text("Discounts") }
+            label = { Text(stringResource(R.string.label_discounts)) }
         )
         NavigationBarItem(
             selected = selectedTab == ShopItemsTab.Cart,
@@ -274,10 +276,10 @@ private fun ShopBottomBar(
             icon = {
                 Icon(
                     Icons.Default.ShoppingCart,
-                    contentDescription = "Cart"
+                    contentDescription = stringResource(R.string.label_cart)
                 )
             },
-            label = { Text("Cart") }
+            label = { Text(stringResource(R.string.label_cart)) }
         )
     }
 }

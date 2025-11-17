@@ -34,6 +34,7 @@ import tcs.app.dev.homework1.data.Euro
 import tcs.app.dev.homework1.data.Item
 import tcs.app.dev.homework1.data.MockData
 import tcs.app.dev.homework1.data.times
+import tcs.app.dev.R
 
 @Composable
 fun CartTab(
@@ -48,7 +49,7 @@ fun CartTab(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Cart is empty") //TODO: stringResource(...)
+            Text(stringResource(R.string.cart_empty))
         }
         return
     }
@@ -94,7 +95,7 @@ fun CartTab(
                         modifier = Modifier.weight(1f)
                     )
                     TextButton(onClick = { onRemoveDiscount(discount) }) {
-                        Text("Remove") // TODO: stringResource(...)
+                        Text(stringResource(R.string.label_remove))
                     }
                 }
             }
@@ -107,14 +108,14 @@ fun CartTab(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Total: ${cart.price}", //TODO: stringResource...
+                text = stringResource(R.string.total_price, cart.price),
                 modifier = Modifier.weight(1f)
             )
             Button(
                 onClick = onPay,
                 enabled = cart.itemCount > 0u
             ) {
-                Text("Pay") //TODO: stringRes...
+                Text(stringResource(R.string.label_pay))
             }
         }
     }

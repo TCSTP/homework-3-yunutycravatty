@@ -27,6 +27,7 @@ import tcs.app.dev.homework1.data.Euro
 import tcs.app.dev.homework1.data.Item
 import tcs.app.dev.homework1.data.MockData
 import tcs.app.dev.homework1.data.Shop
+import tcs.app.dev.R
 
 @Composable
 fun ShopTab(
@@ -86,7 +87,7 @@ private fun ShopItemRow(
                 Spacer(modifier = Modifier.height(4.dp))
             }
             Button(onClick = onAddToCart) {
-                Text("Add") // TODO: stringResource(...)
+                Text(stringResource(R.string.label_add))
             }
         }
     }

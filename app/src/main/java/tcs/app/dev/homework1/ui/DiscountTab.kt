@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import tcs.app.dev.homework1.data.Cart
 import tcs.app.dev.homework1.data.Discount
 import tcs.app.dev.homework1.data.MockData
+import tcs.app.dev.R
 
 @Composable
 fun DiscountTab(
@@ -70,7 +71,7 @@ private fun DiscountRow(
         ) {
             Icon(
                 imageVector = Icons.Default.LocalOffer,
-                contentDescription = "Discount"
+                contentDescription = stringResource(R.string.description_discount_icon)
             )
         }
         Spacer(modifier = Modifier.width(9.dp))
@@ -81,7 +82,7 @@ private fun DiscountRow(
             enabled = enabled,
             onClick = onAdd
         ) {
-            Text("Add") //TODO: stringResource(...)
+            Text(stringResource(R.string.label_add))
         }
     }
 }
@@ -90,13 +91,12 @@ private fun DiscountRow(
 @Composable
 fun discountDescription(discount: Discount): String =
     when (discount) {
-        is Discount.Percentage -> "${discount.value}% off!"
-        is Discount.Fixed -> "-${discount.amount}"
-        is Discount.Bundle -> "Buy ${discount.amountItemsGet} ${
-            stringResource(
-                MockData.getName(
-                    discount.item
-                )
-            )
-        }, pay ${discount.amountItemsPay}!"
+        is Discount.Percentage -> stringResource(R.string.percentage_off, discount.value)
+        is Discount.Fixed -> stringResource(R.string.amount_off, discount.amount)
+        is Discount.Bundle -> stringResource(
+            R.string.pay_n_items_and_get,
+            discount.amountItemsPay,
+            stringResource(MockData.getName(discount.item)),
+            discount.amountItemsGet
+        )
     }
